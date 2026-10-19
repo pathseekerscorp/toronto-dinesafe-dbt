@@ -57,6 +57,18 @@ Rebuilds the `raw.dinesafe` table in `data/dinesafe.duckdb` from every snapshot 
 Columns are loaded as text exactly as published, plus `_snapshot_date`, `_source_file` and
 `_loaded_at` metadata columns. Typing and cleaning happen in dbt.
 
+## Run dbt
+
+```bash
+cd dinesafe
+dbt debug              # check the connection
+dbt source freshness   # warn if the latest snapshot is more than 3 days old
+```
+
+The dbt profile lives in `dinesafe/profiles.yml` (no secrets; it points at `data/dinesafe.duckdb`),
+so run dbt from inside the `dinesafe/` folder. Models are built into three schemas:
+`staging` and `intermediate` (views) and `marts` (tables).
+
 ## Project layout
 
 ```
@@ -64,4 +76,5 @@ data/raw/   downloaded source files (not committed)
 data/sample/ small committed sample for previewing the data
 scripts/    data download and load scripts
 docs/       data profile and design notes (see docs/data_profile.md)
+dinesafe/   dbt project (models/staging, models/intermediate, models/marts)
 ```

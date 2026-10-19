@@ -1,0 +1,10 @@
+# Connection settings for the local DuckDB database built by scripts/load_dinesafe.py.
+# Kept in the project (rather than ~/.dbt/) because it holds no secrets and lets
+# anyone who clones the repo run dbt without extra setup. Run dbt from this folder.
+dinesafe:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: ../data/dinesafe.duckdb
+      threads: 4

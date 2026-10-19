@@ -1,0 +1,35 @@
+version: 2
+
+sources:
+  - name: dinesafe
+    description: >
+      City of Toronto DineSafe food safety inspections, downloaded from the Open Data
+      portal by scripts/download_dinesafe.py and loaded as text by scripts/load_dinesafe.py.
+    schema: raw
+    tables:
+      - name: dinesafe
+        description: >
+          One row per infraction found during an inspection, across all downloaded snapshots.
+          Inspections with no infractions have a single row with severity 'None'.
+          See docs/data_profile.md for data quality notes.
+        config:
+          # The city refreshes the data daily; flag the load if the newest snapshot is stale.
+          loaded_at_field: "_snapshot_date::timestamp"
+          freshness:
+            warn_after: {count: 3, period: day}
+            error_after: {count: 14, period: day}
+        columns:
+          - name: unique_id
+            description: Stable hash identifying an infraction row within a snapshot.
+          - name: estId
+            description: >
+              Establishment ID. Either a legacy numeric ID or an 18-character ID from the
+              city's newer system.
+          - name: inspectionDate
+            description: Inspection date (YYYY-MM-DD). Together with estId identifies an inspection.
+          - name: _snapshot_date
+            description: Date the city last refreshed the snapshot this row came from.
+          - name: _source_file
+            description: Snapshot file the row was loaded from.
+          - name: _loaded_at
+            description: When scripts/load_dinesafe.py loaded the row.
