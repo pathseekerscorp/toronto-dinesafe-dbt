@@ -37,6 +37,36 @@ sources:
             description: Inspection date (YYYY-MM-DD). Together with estId identifies an inspection.
             data_tests:
               - not_null
+          - name: _id
+            description: Row number within the snapshot. Not stable across snapshots.
+          - name: oldEstId
+            description: Legacy numeric establishment ID, or 'None'.
+          - name: estName
+            description: Establishment name.
+          - name: address
+            description: "Address as '<street> <unit> <postal code>', with 'None' for a missing unit or postal code."
+          - name: inspectionStatus
+            description: Pass, Conditional Pass, Closed or Temporarily Not Operating.
+          - name: phone
+            description: Phone number, or 'None' / '0000000000' when missing.
+          - name: observation
+            description: Summary sentence for the inspection. Often understates the worst infraction.
+          - name: typeDesc
+            description: Infraction description, or 'None' for a clean inspection.
+          - name: deficiencyDesc
+            description: Infraction category with its code prefix (e.g. '05.', '5C.', 'A.'), or 'None'.
+          - name: severity
+            description: "'M - Minor', 'S - Significant', 'C - Crucial', 'NA' (administrative) or 'None'."
+          - name: OutcomeDate
+            description: Court outcome date, if any.
+          - name: OutcomeDesc
+            description: Court outcome, or 'None'.
+          - name: amountFined
+            description: Fine in dollars, if any.
+          - name: latitude
+            description: Latitude.
+          - name: longitude
+            description: Longitude.
           - name: _snapshot_date
             description: Date the city last refreshed the snapshot this row came from.
           - name: _source_file

@@ -45,6 +45,54 @@ models:
         description: Establishment ID as published on this record.
       - name: is_from_legacy_id
         description: True when the record was published under a legacy numeric ID.
+      - name: establishment_name
+        description: "{{ doc('col_establishment_name') }}"
+      - name: address
+        description: "{{ doc('col_address') }}"
+      - name: street_address
+        description: "{{ doc('col_street_address') }}"
+      - name: unit
+        description: "{{ doc('col_unit') }}"
+      - name: postal_code
+        description: "{{ doc('col_postal_code') }}"
+      - name: forward_sortation_area
+        description: "{{ doc('col_forward_sortation_area') }}"
+      - name: phone
+        description: "{{ doc('col_phone') }}"
+      - name: latitude
+        description: "{{ doc('col_latitude') }}"
+      - name: longitude
+        description: "{{ doc('col_longitude') }}"
+      - name: inspection_date
+        description: "{{ doc('col_inspection_date') }}"
+      - name: inspection_status
+        description: "{{ doc('col_inspection_status') }}"
+      - name: inspection_summary
+        description: "{{ doc('col_inspection_summary') }}"
+      - name: is_infraction
+        description: "{{ doc('col_is_infraction') }}"
+      - name: infraction_description
+        description: "{{ doc('col_infraction_description') }}"
+      - name: infraction_category_code
+        description: "{{ doc('col_infraction_category_code') }}"
+      - name: infraction_category
+        description: "{{ doc('col_infraction_category') }}"
+      - name: infraction_category_scheme
+        description: "{{ doc('col_infraction_category_scheme') }}"
+      - name: severity_code
+        description: "{{ doc('col_severity_code') }}"
+      - name: severity
+        description: "{{ doc('col_severity') }}"
+      - name: outcome_date
+        description: "{{ doc('col_outcome_date') }}"
+      - name: outcome
+        description: "{{ doc('col_outcome') }}"
+      - name: amount_fined
+        description: "{{ doc('col_amount_fined') }}"
+      - name: snapshot_date
+        description: "{{ doc('col_snapshot_date') }}"
+      - name: loaded_at
+        description: "{{ doc('col_loaded_at') }}"
 
   - name: int_inspections
     description: >

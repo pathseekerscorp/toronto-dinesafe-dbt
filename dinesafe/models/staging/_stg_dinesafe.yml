@@ -65,23 +65,23 @@ models:
       - name: is_legacy_establishment_id
         description: True when establishment_id is a legacy numeric ID.
       - name: establishment_name
-        description: Establishment name.
+        description: "{{ doc('col_establishment_name') }}"
         data_tests:
           - not_null
       - name: address
-        description: Full address as published, including 'None' placeholders.
+        description: "{{ doc('col_address') }}"
       - name: street_address
-        description: Street number and name.
+        description: "{{ doc('col_street_address') }}"
       - name: unit
-        description: Unit, floor or building designation (e.g. Unit-F, Flr-2), if any.
+        description: "{{ doc('col_unit') }}"
       - name: postal_code
-        description: Canadian postal code (e.g. M4A 1X1), if present.
+        description: "{{ doc('col_postal_code') }}"
       - name: forward_sortation_area
-        description: First three characters of the postal code, a neighbourhood-level area (e.g. M4A).
+        description: "{{ doc('col_forward_sortation_area') }}"
       - name: phone
-        description: Phone number, null when missing or a placeholder of zeros.
+        description: "{{ doc('col_phone') }}"
       - name: latitude
-        description: Latitude of the establishment.
+        description: "{{ doc('col_latitude') }}"
         data_tests:
           - not_null
           - dbt_utils.accepted_range:
@@ -89,7 +89,7 @@ models:
                 min_value: 43.55
                 max_value: 43.86
       - name: longitude
-        description: Longitude of the establishment.
+        description: "{{ doc('col_longitude') }}"
         data_tests:
           - not_null
           - dbt_utils.accepted_range:
@@ -97,59 +97,51 @@ models:
                 min_value: -79.65
                 max_value: -79.10
       - name: inspection_date
-        description: Date of the inspection.
+        description: "{{ doc('col_inspection_date') }}"
         data_tests:
           - not_null
       - name: inspection_status
-        description: Result of the inspection.
+        description: "{{ doc('col_inspection_status') }}"
         data_tests:
           - not_null
           - accepted_values:
               arguments:
                 values: ['Pass', 'Conditional Pass', 'Closed', 'Temporarily Not Operating']
       - name: inspection_summary
-        description: >
-          Summary sentence published with the inspection. Unreliable: it often understates
-          the most severe infraction, so use severity instead.
+        description: "{{ doc('col_inspection_summary') }}"
       - name: is_infraction
-        description: False for the single row recorded for an inspection with no infractions.
+        description: "{{ doc('col_is_infraction') }}"
       - name: infraction_description
-        description: Description of the infraction, citing the regulation breached.
+        description: "{{ doc('col_infraction_description') }}"
       - name: infraction_category_code
-        description: >
-          Category code as published, e.g. '05' (current scheme), '5C' (legacy scheme) or
-          'A' (administrative). Null for the uncoded 'ADMINISTRATIVE REQUIREMENTS' category.
+        description: "{{ doc('col_infraction_category_code') }}"
       - name: infraction_category
-        description: Infraction category, without its code prefix. Legacy-scheme text is often truncated at source.
+        description: "{{ doc('col_infraction_category') }}"
       - name: infraction_category_scheme
-        description: >
-          Which category coding scheme the row uses. The city switched from the legacy
-          scheme to the current one in early November 2025; the two don't map one-to-one.
+        description: "{{ doc('col_infraction_category_scheme') }}"
         data_tests:
           - accepted_values:
               arguments:
                 values: ['current', 'legacy', 'administrative']
       - name: severity_code
-        description: M, S, C or NA. Null when there is no infraction.
+        description: "{{ doc('col_severity_code') }}"
         data_tests:
           - accepted_values:
               arguments:
                 values: ['M', 'S', 'C', 'NA']
       - name: severity
-        description: >
-          Minor, Significant, Crucial or Not Applicable. Not Applicable is used for
-          administrative infractions such as no supervisor present or no licence.
+        description: "{{ doc('col_severity') }}"
       - name: outcome_date
-        description: Date of the court outcome, if the infraction went to court.
+        description: "{{ doc('col_outcome_date') }}"
       - name: outcome
-        description: Court outcome, with the two spellings of "Conviction - Fined" merged.
+        description: "{{ doc('col_outcome') }}"
       - name: amount_fined
-        description: Fine in dollars, if any.
+        description: "{{ doc('col_amount_fined') }}"
         data_tests:
           - dbt_utils.accepted_range:
               arguments:
                 min_value: 0
       - name: snapshot_date
-        description: Date the city last refreshed the snapshot this record came from.
+        description: "{{ doc('col_snapshot_date') }}"
       - name: loaded_at
-        description: When the record was loaded into DuckDB.
+        description: "{{ doc('col_loaded_at') }}"

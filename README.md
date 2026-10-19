@@ -72,9 +72,46 @@ so run dbt from inside the `dinesafe/` folder. Models are built into three schem
 ```bash
 dbt deps               # install dbt packages (first run only)
 dbt build              # build all models and run all tests
+dbt docs generate      # build the documentation site
+dbt docs serve         # open it in a browser (model and column docs, lineage graph)
 ```
 
 ## Models
+
+```mermaid
+flowchart LR
+    src[(raw.dinesafe)]
+
+    subgraph staging
+        stg[stg_dinesafe__inspection_records]
+    end
+
+    subgraph intermediate
+        map[int_establishment_id_map]
+        rec[int_inspection_records]
+        insp[int_inspections]
+    end
+
+    subgraph marts
+        dim[dim_establishments]
+        fi[fct_inspections]
+        fx[fct_infractions]
+        rpt[rpt_inspections_by_area]
+    end
+
+    src --> stg
+    stg --> map
+    stg --> rec
+    map --> rec
+    rec --> insp
+    insp --> fi
+    rec --> fx
+    rec --> dim
+    map --> dim
+    fi --> dim
+    fi --> rpt
+    dim --> rpt
+```
 
 | Layer | Model | Grain |
 |---|---|---|
