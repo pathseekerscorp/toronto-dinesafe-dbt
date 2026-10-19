@@ -36,7 +36,7 @@ Profiled from `data/raw/dinesafe_2026-10-18.csv` (snapshot refreshed by the city
 | `inspectionDate` | Inspection date | Clean ISO dates |
 | `observation` | Inspection summary sentence | Doesn't reliably match the infractions, see below |
 | `typeDesc` | Infraction description | 397 values |
-| `deficiencyDesc` | Infraction category | 35 values, prefixed `01.` to `NN.` |
+| `deficiencyDesc` | Infraction category | 35 values across two coding schemes, see finding 9 |
 | `severity` | Infraction severity | `M - Minor`, `S - Significant`, `C - Crucial`, `NA`, `None` |
 | `OutcomeDate`, `OutcomeDesc`, `amountFined` | Court outcome | Populated on ~0.2% of rows |
 | `latitude`, `longitude` | Location | All within Toronto (lat 43.59–43.84, lon −79.64 to −79.13) |
@@ -67,6 +67,12 @@ infraction type, not the establishment type.
 7. **Fines** range from $0 to $12,505 (median $150, total $158,792.50). 11 rows have a $0 fine.
 8. **Postal codes** can be parsed from the end of `address` for 98% of rows, which enables
    area-level analysis by the first three characters of the postal code.
+9. **Two infraction category schemes.** Until 2025-11-07, categories use a legacy scheme
+   (`5C. Proper maintenance / washing of rooms…`, often truncated). From 2025-11-05 they use a
+   current scheme (`05. MAINTENANCE / SANITATION OF NON-FOOD CONTACT SURFACES…`). The schemes
+   don't map one-to-one. Administrative categories (`A.`, `B.`, `D.` or the uncoded
+   `ADMINISTRATIVE REQUIREMENTS`) appear throughout and correspond exactly to the 5,509
+   `NA`-severity rows.
 
 ## Modelling implications
 

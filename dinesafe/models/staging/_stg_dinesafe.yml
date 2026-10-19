@@ -1,0 +1,101 @@
+version: 2
+
+models:
+  - name: stg_dinesafe__inspection_records
+    description: >
+      Cleaned DineSafe records: one row per infraction found during an inspection, or a
+      single row for an inspection with no infractions (is_infraction = false). Text
+      placeholders ('None', zero phone numbers) are converted to nulls, columns are typed,
+      the address is split into street, unit and postal code, and the latest snapshot of
+      each record is kept. An inspection is identified by establishment_id + inspection_date.
+    columns:
+      - name: record_id
+        description: Unique ID of the record (source unique_id).
+        data_tests:
+          - unique
+          - not_null
+      - name: establishment_id
+        description: >
+          Establishment ID as published. Legacy numeric IDs and the city's newer
+          18-character IDs both appear; the same restaurant can have one of each.
+        data_tests:
+          - not_null
+      - name: legacy_establishment_id
+        description: >
+          Legacy numeric ID. For new-format establishments this links back to the
+          establishment's old ID, where one exists.
+      - name: is_legacy_establishment_id
+        description: True when establishment_id is a legacy numeric ID.
+      - name: establishment_name
+        description: Establishment name.
+        data_tests:
+          - not_null
+      - name: address
+        description: Full address as published, including 'None' placeholders.
+      - name: street_address
+        description: Street number and name.
+      - name: unit
+        description: Unit, floor or building designation (e.g. Unit-F, Flr-2), if any.
+      - name: postal_code
+        description: Canadian postal code (e.g. M4A 1X1), if present.
+      - name: forward_sortation_area
+        description: First three characters of the postal code, a neighbourhood-level area (e.g. M4A).
+      - name: phone
+        description: Phone number, null when missing or a placeholder of zeros.
+      - name: latitude
+        description: Latitude of the establishment.
+      - name: longitude
+        description: Longitude of the establishment.
+      - name: inspection_date
+        description: Date of the inspection.
+        data_tests:
+          - not_null
+      - name: inspection_status
+        description: Result of the inspection.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Pass', 'Conditional Pass', 'Closed', 'Temporarily Not Operating']
+      - name: inspection_summary
+        description: >
+          Summary sentence published with the inspection. Unreliable: it often understates
+          the most severe infraction, so use severity instead.
+      - name: is_infraction
+        description: False for the single row recorded for an inspection with no infractions.
+      - name: infraction_description
+        description: Description of the infraction, citing the regulation breached.
+      - name: infraction_category_code
+        description: >
+          Category code as published, e.g. '05' (current scheme), '5C' (legacy scheme) or
+          'A' (administrative). Null for the uncoded 'ADMINISTRATIVE REQUIREMENTS' category.
+      - name: infraction_category
+        description: Infraction category, without its code prefix. Legacy-scheme text is often truncated at source.
+      - name: infraction_category_scheme
+        description: >
+          Which category coding scheme the row uses. The city switched from the legacy
+          scheme to the current one in early November 2025; the two don't map one-to-one.
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['current', 'legacy', 'administrative']
+      - name: severity_code
+        description: M, S, C or NA. Null when there is no infraction.
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['M', 'S', 'C', 'NA']
+      - name: severity
+        description: >
+          Minor, Significant, Crucial or Not Applicable. Not Applicable is used for
+          administrative infractions such as no supervisor present or no licence.
+      - name: outcome_date
+        description: Date of the court outcome, if the infraction went to court.
+      - name: outcome
+        description: Court outcome, with the two spellings of "Conviction - Fined" merged.
+      - name: amount_fined
+        description: Fine in dollars, if any.
+      - name: snapshot_date
+        description: Date the city last refreshed the snapshot this record came from.
+      - name: loaded_at
+        description: When the record was loaded into DuckDB.
