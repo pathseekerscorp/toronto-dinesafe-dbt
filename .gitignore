@@ -1,0 +1,22 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Data (downloaded by scripts, not committed)
+data/raw/*
+!data/raw/.gitkeep
+*.duckdb
+*.duckdb.wal
+
+# dbt
+target/
+dbt_packages/
+logs/
+.user.yml
+
+# Local secrets and editor/OS files
+.env
+.DS_Store
+.vscode/
+.idea/
