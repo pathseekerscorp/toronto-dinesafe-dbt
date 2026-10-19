@@ -1,0 +1,187 @@
+version: 2
+
+models:
+  - name: dim_establishments
+    description: >
+      One row per food establishment, with legacy and new IDs merged. Name, address and
+      location come from the establishment's most recent record; inspection history is
+      summarised from fct_inspections. DineSafe doesn't publish an establishment type.
+    columns:
+      - name: establishment_id
+        description: Canonical establishment ID (the new-system ID where one exists).
+        data_tests:
+          - unique
+          - not_null
+      - name: legacy_establishment_id
+        description: Legacy numeric ID merged into this establishment, if any.
+      - name: establishment_name
+        description: Establishment name.
+      - name: address
+        description: Full address as published.
+      - name: street_address
+        description: Street number and name.
+      - name: unit
+        description: Unit, floor or building designation, if any.
+      - name: postal_code
+        description: Postal code, if published.
+      - name: forward_sortation_area
+        description: First three characters of the postal code (e.g. M5V), a neighbourhood-level area.
+      - name: phone
+        description: Phone number, if published.
+      - name: latitude
+        description: Latitude.
+      - name: longitude
+        description: Longitude.
+      - name: inspection_count
+        description: Number of inspections in the data.
+      - name: first_inspection_date
+        description: Date of the earliest inspection in the data (the data covers a rolling window, so not necessarily the first ever).
+      - name: last_inspection_date
+        description: Date of the most recent inspection.
+      - name: last_inspection_status
+        description: Result of the most recent inspection.
+      - name: conditional_pass_count
+        description: Number of inspections resulting in a conditional pass.
+      - name: closure_count
+        description: Number of inspections resulting in closure.
+      - name: infraction_count
+        description: Total infractions across all inspections.
+      - name: crucial_infraction_count
+        description: Total crucial infractions across all inspections.
+      - name: total_amount_fined
+        description: Total court fines in dollars.
+
+  - name: fct_inspections
+    description: >
+      One row per inspection, with its result, infraction counts by severity, the worst
+      severity found (derived from the infractions, not the published summary), fines,
+      and its position in the establishment's inspection history.
+    columns:
+      - name: inspection_id
+        description: Hash of establishment_id and inspection_date.
+        data_tests:
+          - unique
+          - not_null
+      - name: establishment_id
+        description: Canonical establishment ID.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_establishments')
+                field: establishment_id
+      - name: inspection_date
+        description: Date of the inspection.
+        data_tests:
+          - not_null
+      - name: inspection_status
+        description: Pass, Conditional Pass, Closed or Temporarily Not Operating.
+      - name: is_pass
+        description: True when the inspection resulted in a pass.
+      - name: is_conditional_pass
+        description: True when the inspection resulted in a conditional pass.
+      - name: is_closed
+        description: True when the inspection resulted in closure.
+      - name: infraction_count
+        description: Number of infractions found (0 for a clean inspection).
+      - name: crucial_count
+        description: Number of crucial infractions.
+      - name: significant_count
+        description: Number of significant infractions.
+      - name: minor_count
+        description: Number of minor infractions.
+      - name: not_applicable_count
+        description: Number of administrative infractions (severity Not Applicable).
+      - name: worst_severity_code
+        description: Most severe infraction found (C > S > M > NA). Null when there were none.
+      - name: worst_severity
+        description: Label for worst_severity_code.
+      - name: court_outcome_count
+        description: Number of infractions with a recorded court outcome.
+      - name: total_amount_fined
+        description: Total fines in dollars across the inspection's infractions.
+      - name: inspection_sequence
+        description: 1 for the establishment's earliest inspection in the data, 2 for the next, and so on.
+      - name: previous_inspection_date
+        description: Date of the establishment's previous inspection in the data.
+      - name: days_since_previous_inspection
+        description: Days since the previous inspection. Null for the first inspection in the data.
+      - name: previous_inspection_status
+        description: Result of the previous inspection.
+      - name: source_establishment_id
+        description: Establishment ID the inspection was published under.
+      - name: is_from_legacy_id
+        description: True when the inspection was published under a legacy numeric ID.
+
+  - name: fct_infractions
+    description: >
+      One row per infraction found during an inspection. Clean inspections have no rows
+      here. Category codes use two schemes (legacy until Nov 2025, current after) that
+      don't map one-to-one; filter or group by infraction_category_scheme.
+    columns:
+      - name: infraction_id
+        description: Unique ID of the infraction record.
+        data_tests:
+          - unique
+          - not_null
+      - name: inspection_id
+        description: Inspection the infraction was found in.
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('fct_inspections')
+                field: inspection_id
+      - name: establishment_id
+        description: Canonical establishment ID.
+      - name: inspection_date
+        description: Date of the inspection.
+      - name: severity_code
+        description: M, S, C or NA.
+      - name: severity
+        description: Minor, Significant, Crucial or Not Applicable (administrative).
+      - name: infraction_category_scheme
+        description: current, legacy or administrative.
+      - name: infraction_category_code
+        description: Category code as published (e.g. 05, 5C, A).
+      - name: infraction_category
+        description: Infraction category.
+      - name: infraction_description
+        description: Description of the infraction, citing the regulation breached.
+      - name: outcome
+        description: Court outcome, if the infraction went to court.
+      - name: outcome_date
+        description: Date of the court outcome.
+      - name: amount_fined
+        description: Fine in dollars, if any.
+
+  - name: rpt_inspections_by_area
+    description: >
+      Inspection outcomes by forward sortation area (first three characters of the postal
+      code). One row per area, plus a null-area row for establishments without a postal
+      code. Rates are shares of inspections; filter on inspection_count before ranking.
+    columns:
+      - name: forward_sortation_area
+        description: Postal area, e.g. M5V. Null for establishments without a postal code.
+        data_tests:
+          - unique
+      - name: establishment_count
+        description: Establishments inspected in the area.
+      - name: inspection_count
+        description: Inspections in the area.
+      - name: conditional_pass_count
+        description: Inspections resulting in a conditional pass.
+      - name: closure_count
+        description: Inspections resulting in closure.
+      - name: inspections_with_crucial_count
+        description: Inspections with at least one crucial infraction.
+      - name: conditional_pass_rate
+        description: Share of inspections resulting in a conditional pass.
+      - name: closure_rate
+        description: Share of inspections resulting in closure.
+      - name: crucial_infraction_rate
+        description: Share of inspections with at least one crucial infraction.
+      - name: avg_infractions_per_inspection
+        description: Average number of infractions per inspection.
+      - name: total_amount_fined
+        description: Total court fines in dollars.

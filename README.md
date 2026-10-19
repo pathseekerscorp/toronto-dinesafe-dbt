@@ -69,6 +69,27 @@ The dbt profile lives in `dinesafe/profiles.yml` (no secrets; it points at `data
 so run dbt from inside the `dinesafe/` folder. Models are built into three schemas:
 `staging` and `intermediate` (views) and `marts` (tables).
 
+```bash
+dbt build              # build all models and run all tests
+```
+
+## Models
+
+| Layer | Model | Grain |
+|---|---|---|
+| Staging | `stg_dinesafe__inspection_records` | One cleaned, typed record per infraction (or per clean inspection) |
+| Intermediate | `int_establishment_id_map` | One row per published establishment ID, mapped to a canonical ID |
+| Intermediate | `int_inspection_records` | Records keyed to canonical establishments, with migrated duplicates removed |
+| Intermediate | `int_inspections` | One row per inspection |
+| Marts | `dim_establishments` | One row per establishment (18,540) |
+| Marts | `fct_inspections` | One row per inspection (79,244) |
+| Marts | `fct_infractions` | One row per infraction (74,543) |
+| Marts | `rpt_inspections_by_area` | One row per postal area (first three characters of the postal code) |
+
+The main modelling challenge is the city's November 2025 system migration: 1,098 establishments
+appear under both a legacy and a new ID, with 2,769 inspections duplicated across the two.
+The intermediate layer merges them; see [`docs/data_profile.md`](docs/data_profile.md) for details.
+
 ## Project layout
 
 ```
