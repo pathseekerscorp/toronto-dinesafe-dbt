@@ -1,0 +1,90 @@
+version: 2
+
+models:
+  - name: int_establishment_id_map
+    description: >
+      Maps every establishment ID in the data to one canonical ID. A legacy numeric ID
+      that a new-format establishment links back to (via legacy_establishment_id) maps
+      to the new ID; every other ID maps to itself.
+    columns:
+      - name: establishment_id
+        description: Establishment ID as published.
+        data_tests:
+          - unique
+          - not_null
+      - name: canonical_establishment_id
+        description: The ID used for this establishment in all downstream models.
+        data_tests:
+          - not_null
+      - name: is_legacy_establishment_id
+        description: True when establishment_id is a legacy numeric ID.
+      - name: is_merged_into_new_id
+        description: True when this legacy ID was mapped to a new-format ID.
+
+  - name: int_inspection_records
+    description: >
+      Staging records keyed to the canonical establishment and an inspection, with
+      inspections the city copied from a legacy ID to its new ID during the November 2025
+      migration kept only once (the new-ID copy). One row per infraction, or one row for
+      an inspection with no infractions.
+    columns:
+      - name: record_id
+        description: Unique ID of the record.
+        data_tests:
+          - unique
+          - not_null
+      - name: inspection_id
+        description: Hash of establishment_id and inspection_date.
+        data_tests:
+          - not_null
+      - name: establishment_id
+        description: Canonical establishment ID.
+        data_tests:
+          - not_null
+      - name: source_establishment_id
+        description: Establishment ID as published on this record.
+      - name: is_from_legacy_id
+        description: True when the record was published under a legacy numeric ID.
+
+  - name: int_inspections
+    description: >
+      One row per inspection, with infraction counts by severity, the worst severity found,
+      and court outcomes and fines.
+    columns:
+      - name: inspection_id
+        description: Hash of establishment_id and inspection_date.
+        data_tests:
+          - unique
+          - not_null
+      - name: establishment_id
+        description: Canonical establishment ID.
+        data_tests:
+          - not_null
+      - name: source_establishment_id
+        description: Establishment ID the inspection was published under.
+      - name: is_from_legacy_id
+        description: True when the inspection was published under a legacy numeric ID.
+      - name: inspection_date
+        description: Date of the inspection.
+        data_tests:
+          - not_null
+      - name: inspection_status
+        description: Pass, Conditional Pass, Closed or Temporarily Not Operating.
+      - name: inspection_summary
+        description: Summary sentence as published. Unreliable; prefer worst_severity_code.
+      - name: infraction_count
+        description: Number of infractions found (0 for a clean inspection).
+      - name: crucial_count
+        description: Number of crucial infractions.
+      - name: significant_count
+        description: Number of significant infractions.
+      - name: minor_count
+        description: Number of minor infractions.
+      - name: not_applicable_count
+        description: Number of administrative infractions (severity Not Applicable).
+      - name: worst_severity_code
+        description: Most severe infraction found (C > S > M > NA). Null when there were none.
+      - name: court_outcome_count
+        description: Number of infractions with a recorded court outcome.
+      - name: total_amount_fined
+        description: Total fines in dollars across the inspection's infractions.

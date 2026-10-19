@@ -73,6 +73,14 @@ infraction type, not the establishment type.
    don't map one-to-one. Administrative categories (`A.`, `B.`, `D.` or the uncoded
    `ADMINISTRATIVE REQUIREMENTS`) appear throughout and correspond exactly to the 5,509
    `NA`-severity rows.
+10. **Migrated history is duplicated.** For the 1,098 restaurants with both a legacy and a new
+    ID, the city copied inspection history into the new system: 2,769 of their 2,790
+    legacy-ID inspections also appear under the new ID on the same date, with the same status
+    and (in all but 8 cases) the same infractions. Counting both would double-count those
+    inspections. The intermediate models merge the IDs and keep the new-ID copy, removing
+    4,093 duplicate records and leaving 79,244 inspections of 18,540 establishments.
+    Restaurants whose new record doesn't carry `oldEstId` can't be linked, so a few
+    duplicates may remain.
 
 ## Modelling implications
 
