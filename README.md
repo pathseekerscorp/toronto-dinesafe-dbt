@@ -28,4 +28,5 @@ Use `--force` to re-download a snapshot that already exists.
 ```
 data/raw/   downloaded source files (not committed)
 scripts/    data download and load scripts
+docs/       data profile and design notes (see docs/data_profile.md)
 ```
