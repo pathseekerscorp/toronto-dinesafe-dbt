@@ -70,6 +70,7 @@ so run dbt from inside the `dinesafe/` folder. Models are built into three schem
 `staging` and `intermediate` (views) and `marts` (tables).
 
 ```bash
+dbt deps               # install dbt packages (first run only)
 dbt build              # build all models and run all tests
 ```
 
@@ -89,6 +90,27 @@ dbt build              # build all models and run all tests
 The main modelling challenge is the city's November 2025 system migration: 1,098 establishments
 appear under both a legacy and a new ID, with 2,769 inspections duplicated across the two.
 The intermediate layer merges them; see [`docs/data_profile.md`](docs/data_profile.md) for details.
+
+## Data quality tests
+
+`dbt build` runs 78 tests alongside the models (using [dbt_utils](https://github.com/dbt-labs/dbt-utils)):
+
+- **Keys and relationships:** primary keys are unique and not null at every layer; every
+  inspection and infraction points to a real establishment and inspection.
+- **Valid values and ranges:** statuses and severities from known lists, coordinates within
+  Toronto, Toronto-format postal codes, non-negative fines, no future inspections.
+- **Business rules:** closures always involve a crucial infraction, passes never do, and
+  severity counts add up to the infraction count.
+- **Reconciliation:** infraction counts match between `fct_inspections` and `fct_infractions`,
+  the area report accounts for every inspection and dollar fined, and merging legacy IDs
+  never loses an inspection or double-counts one.
+
+Three tests are set to **warn** rather than fail, because the source data has a handful of
+known exceptions: court outcomes dated before the inspection (3), a conviction with no fine
+recorded (1), and conditional passes with only minor infractions (6).
+
+Rows behind any failing or warning test are saved to the `test_failures` schema in DuckDB,
+one table per test, so they can be inspected directly.
 
 ## Project layout
 

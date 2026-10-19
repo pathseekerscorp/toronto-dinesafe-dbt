@@ -28,3 +28,10 @@ models:
     marts:
       +materialized: table
       +schema: marts
+
+# Save the rows behind any failing or warning test to the test_failures schema,
+# so they can be queried directly (one table per test).
+data_tests:
+  dinesafe:
+    +store_failures: true
+    +schema: test_failures

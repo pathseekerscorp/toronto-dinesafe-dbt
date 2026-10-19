@@ -50,6 +50,10 @@ models:
     description: >
       One row per inspection, with infraction counts by severity, the worst severity found,
       and court outcomes and fines.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [establishment_id, inspection_date]
     columns:
       - name: inspection_id
         description: Hash of establishment_id and inspection_date.

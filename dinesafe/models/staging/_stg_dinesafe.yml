@@ -8,6 +8,44 @@ models:
       placeholders ('None', zero phone numbers) are converted to nulls, columns are typed,
       the address is split into street, unit and postal code, and the latest snapshot of
       each record is kept. An inspection is identified by establishment_id + inspection_date.
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: stg_records_severity_present_only_for_infractions
+          arguments:
+            expression: "(severity_code is null) = (not is_infraction)"
+      - dbt_utils.expression_is_true:
+          name: stg_records_administrative_category_matches_na_severity
+          arguments:
+            expression: "(infraction_category_scheme = 'administrative') = (severity_code = 'NA')"
+          config:
+            where: "is_infraction"
+      - dbt_utils.expression_is_true:
+          name: stg_records_inspection_not_after_snapshot
+          arguments:
+            expression: "inspection_date <= snapshot_date"
+      - dbt_utils.expression_is_true:
+          name: stg_records_fine_has_court_outcome
+          arguments:
+            expression: "amount_fined is null or outcome is not null"
+      - dbt_utils.expression_is_true:
+          name: stg_records_postal_code_is_toronto_format
+          arguments:
+            expression: "regexp_full_match(postal_code, 'M[0-9][A-Z] [0-9][A-Z][0-9]')"
+      # Known source quirks: a few court outcomes are dated before the inspection, and
+      # one conviction has no fine recorded. Warn rather than fail.
+      - dbt_utils.expression_is_true:
+          name: stg_records_outcome_not_before_inspection
+          arguments:
+            expression: "outcome_date >= inspection_date"
+          config:
+            severity: warn
+      - dbt_utils.expression_is_true:
+          name: stg_records_conviction_fined_has_amount
+          arguments:
+            expression: "amount_fined is not null"
+          config:
+            where: "outcome = 'Conviction - Fined'"
+            severity: warn
     columns:
       - name: record_id
         description: Unique ID of the record (source unique_id).
@@ -44,8 +82,20 @@ models:
         description: Phone number, null when missing or a placeholder of zeros.
       - name: latitude
         description: Latitude of the establishment.
+        data_tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 43.55
+                max_value: 43.86
       - name: longitude
         description: Longitude of the establishment.
+        data_tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: -79.65
+                max_value: -79.10
       - name: inspection_date
         description: Date of the inspection.
         data_tests:
@@ -95,6 +145,10 @@ models:
         description: Court outcome, with the two spellings of "Conviction - Fined" merged.
       - name: amount_fined
         description: Fine in dollars, if any.
+        data_tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
       - name: snapshot_date
         description: Date the city last refreshed the snapshot this record came from.
       - name: loaded_at

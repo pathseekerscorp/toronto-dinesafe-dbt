@@ -18,15 +18,25 @@ sources:
           freshness:
             warn_after: {count: 3, period: day}
             error_after: {count: 14, period: day}
+        data_tests:
+          - dbt_utils.unique_combination_of_columns:
+              arguments:
+                combination_of_columns: [unique_id, _snapshot_date]
         columns:
           - name: unique_id
             description: Stable hash identifying an infraction row within a snapshot.
+            data_tests:
+              - not_null
           - name: estId
             description: >
               Establishment ID. Either a legacy numeric ID or an 18-character ID from the
               city's newer system.
+            data_tests:
+              - not_null
           - name: inspectionDate
             description: Inspection date (YYYY-MM-DD). Together with estId identifies an inspection.
+            data_tests:
+              - not_null
           - name: _snapshot_date
             description: Date the city last refreshed the snapshot this row came from.
           - name: _source_file
